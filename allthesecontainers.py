@@ -1,6 +1,5 @@
 import random
 import subprocess
-from typing import List
 
 
 def get_password() -> str:
@@ -57,7 +56,7 @@ def create_veracrypt_image() -> None:
     ]
 
     try:
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        subprocess.run(command, check=True, capture_output=True, text=True)
         print("VeraCrypt image created successfully.")
         with open("passwords.lst", "a") as file:
             file.write(password + '\n')
@@ -69,7 +68,6 @@ def create_veracrypt_image() -> None:
 
 def main() -> None:
     """Creates 100 VeraCrypt images."""
-    passwords = []
     for i in range(0, 100):
         create_veracrypt_image()
 
