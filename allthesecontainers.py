@@ -1,59 +1,80 @@
 import random
 import subprocess
+from typing import List
 
 
-class ATC:
-    def __init__(self):
-        pass
+def get_password() -> str:
+    """Generates a random 4-digit numeric password.
 
-    def get_password(self):
-        return f"{random.randint(0000, 9999):04d}"
-
-    def get_container_name(self):
-        name_choices = "abcdefghijklmnopqrstuvwxyz"
-        container_name = ""
-
-        for i in range(0, 10):
-            container_name += random.choice(name_choices)
-
-        return container_name + ".hc"
-
-    def get_random_size(self):
-        size = str(random.randint(1, 10))
-        return size + "M"
-
-    def create_veracrypt_image(self):
-        """
-        Creates a VeraCrypt hard drive image.
-
-        Args:
-            image_path (str): Full path of the image file to be created.
-            size (str): Size of the image, e.g., "200M" for 200 megabytes.
-            password (str): Password for the encrypted image.
-        """
-        image_path = self.get_container_name()
-        size = self.get_random_size()
-        password = self.get_password()
-
-        command = [
-            "c:\\Program Files\\VeraCrypt\\VeraCrypt Format.exe",
-            "/create",  # Create volume
-            image_path,
-            "/size", size,
-            "/password", password,
-            "/hash", "sha512",  # Example, you can choose the desired hash
-            "/encryption", "AES",  # Example, choose your encryption algorithm
-            "/filesystem", "EXFAT",  # Example, choose your filesystem
-            "/silent"
-        ]
-
-        try:
-            result = subprocess.run(command, check=True, capture_output=True, text=True)
-            print("VeraCrypt image created successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"Error creating image: {e.stderr}")
+    Returns:
+        str: A 4-digit string representing the password.
+    """
+    return f"{random.randint(0000, 9999):04d}"
 
 
-atc = ATC()
-for i in range(0, 100):
-    atc.create_veracrypt_image()
+def get_container_name() -> str:
+    """Generates a random container name ending in '.hc'.
+
+    Returns:
+        str: A 10-character random lowercase name with the '.hc' extension.
+    """
+    name_choices = "abcdefghijklmnopqrstuvwxyz"
+    container_name = ""
+
+    for i in range(0, 10):
+        container_name += random.choice(name_choices)
+
+    return container_name + ".hc"
+
+
+def get_random_size() -> str:
+    """Generates a random image size between 1M and 10M.
+
+    Returns:
+        str: Size with the 'M' suffix for megabytes (e.g., "7M").
+    """
+    size = str(random.randint(1, 10))
+    return size + "M"
+
+
+def create_veracrypt_image() -> None:
+    """Creates a VeraCrypt hard drive image with a random name, size, and password.
+    """
+    image_path = get_container_name()
+    size = get_random_size()
+    password = get_password()
+
+    command = [
+        "c:\\Program Files\\VeraCrypt\\VeraCrypt Format.exe",
+        "/create",
+        image_path,
+        "/size", size,
+        "/password", password,
+        "/hash", "sha512",
+        "/encryption", "AES",
+        "/filesystem", "EXFAT",
+        "/silent"
+    ]
+
+    try:
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        print("VeraCrypt image created successfully.")
+        with open("passwords.lst", "a") as file:
+            file.write(password + '\n')
+            file.close()
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error creating image: {e.stderr}")
+
+
+def main() -> None:
+    """Creates 100 VeraCrypt images."""
+    passwords = []
+    for i in range(0, 100):
+        create_veracrypt_image()
+
+    print(f"[+] Passwords saved to: password.lst")
+
+
+if __name__ == "__main__":
+    main()
